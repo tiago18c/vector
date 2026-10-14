@@ -25,7 +25,7 @@ pinocchio::no_allocator!();
 #[cfg(not(feature = "no-entrypoint"))]
 pinocchio::nostd_panic_handler!();
 
-declare_id!("vectorcLBXJ2TuoKuUygkEi6FWqvBnbHDEDWoYamfjV");
+declare_id!("74mXFW7BSAAwc6zQC2uYKuDcWnz17HHXMWqLnEeg9BJv");
 
 pub fn process_instruction(
     _program_id: &Address,

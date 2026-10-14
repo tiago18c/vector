@@ -18,8 +18,9 @@
 //!   [`create_advance_instruction`], [`create_passthrough_instruction`],
 //!   close/withdraw sub-instructions).
 //! - [`digest`] — [`advance_vector_digest`], the value clients sign.
-//! - [`verify`] — [`verify_advance_signature`], the offline check of an
-//!   `advance` signature. It returns the digest, the account's next nonce.
+//! - [`verify`] — [`verify_signature`] over a digest the caller has, and
+//!   [`verify_advance_signature`], which rebuilds that digest from the
+//!   instruction layout and returns it (the account's next nonce).
 //! - [`schemes`] — one module per scheme (`ed25519`, `eip191`, `falcon512`,
 //!   `mldsa44`, `secp256k1`, `winternitz`, `xmss`): its `Scheme` const, an
 //!   `initialize` builder, and a signer where one exists.

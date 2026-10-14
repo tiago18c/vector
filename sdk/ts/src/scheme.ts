@@ -15,7 +15,7 @@ export const WITHDRAW_DISCRIMINATOR = 3;
 export const CLOSE_DISCRIMINATOR = 4;
 
 /** The Vector program: one program for every signing scheme. */
-export const PROGRAM_ID = new Address("vectorcLBXJ2TuoKuUygkEi6FWqvBnbHDEDWoYamfjV");
+export const PROGRAM_ID = new Address("74mXFW7BSAAwc6zQC2uYKuDcWnz17HHXMWqLnEeg9BJv");
 
 /**
  * The account header: `nonce[32] || seed[32] || scheme[1] || bump[1] ||

@@ -214,9 +214,9 @@ fn client_encoding_matches_typescript() {
     let (pda, bump) = find_vector_pda(&MLDSA44, &pk);
     assert_eq!(
         pda.to_string(),
-        "DSMGfPwdpxKeB7ai2vYrRSzTLPDTXKTFujjBMeGkKfMc"
+        "BtNpTkK73L4zTLZUfo7DWGQWrVt5VKPvkZxbG7DTfMPu"
     );
-    assert_eq!(bump, 254);
+    assert_eq!(bump, 255);
     let post = create_passthrough_instruction(
         &MLDSA44,
         &pk,
@@ -228,8 +228,8 @@ fn client_encoding_matches_typescript() {
     assert_eq!(
         digest,
         [
-            218, 95, 52, 42, 253, 160, 153, 191, 84, 231, 128, 114, 207, 177, 197, 166, 73, 1, 113,
-            186, 254, 117, 110, 198, 201, 78, 112, 3, 33, 225, 100, 64
+            147, 130, 193, 143, 44, 147, 205, 235, 82, 18, 98, 142, 33, 113, 183, 239, 29, 50, 222,
+            95, 84, 182, 196, 191, 180, 103, 61, 132, 179, 133, 12, 111
         ]
     );
 }

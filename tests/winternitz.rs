@@ -24,7 +24,7 @@ fn initialize_and_client_encoding() {
     // Shared with sdk/ts/test/winternitz.test.ts.
     assert_eq!(
         vector.to_string(),
-        "Er2fQZXAf3ZoVHiDQAgJGReN5qUz2oh6t8qfU3GGSb9Y"
+        "TsFxombuVYmTHyEQt9CMss2ZzzoL9CdaB5T5xxchfSP"
     );
     assert_eq!(bump, 255);
     let receiver = Address::new_from_array([9; 32]);
@@ -41,8 +41,8 @@ fn initialize_and_client_encoding() {
             None
         ),
         [
-            75, 188, 38, 174, 194, 65, 113, 65, 107, 130, 97, 210, 53, 94, 208, 104, 187, 85, 205,
-            31, 27, 12, 79, 46, 95, 232, 249, 125, 72, 19, 87, 182
+            39, 73, 236, 212, 138, 175, 77, 32, 180, 83, 162, 109, 232, 112, 64, 237, 1, 232, 217,
+            254, 3, 112, 196, 192, 184, 44, 65, 182, 181, 3, 167, 186
         ],
     );
 

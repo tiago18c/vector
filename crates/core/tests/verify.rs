@@ -9,12 +9,13 @@ use pqcrypto_falcon::falcon512 as pq_falcon;
 use pqcrypto_traits::sign::{DetachedSignature as _, PublicKey as _};
 use solana_address::Address;
 use solana_instruction::{AccountMeta, Instruction};
+use solana_winternitz::hazmat;
 use vector_core::{
-    advance_vector_digest, ed25519_pubkey, revocation_digest, secp256k1_compressed_pubkey,
-    secp256k1_eip191_eth_address, sign_advance_instruction_ed25519,
+    advance_vector_digest, ed25519_pubkey, revocation_digest, rotating_advance_vector_digest,
+    secp256k1_compressed_pubkey, secp256k1_eip191_eth_address, sign_advance_instruction_ed25519,
     sign_advance_instruction_secp256k1_ecdsa, sign_advance_instruction_secp256k1_eip191,
-    sign_revocation_instruction_ed25519, verify_advance_signature, VerifyError, ED25519, EIP191,
-    FALCON512, SECP256K1, SYSTEM_PROGRAM_ID,
+    sign_revocation_instruction_ed25519, verify_advance_signature, verify_signature, VerifyError,
+    ED25519, EIP191, FALCON512, SECP256K1, SYSTEM_PROGRAM_ID, WINTERNITZ, XMSS,
 };
 
 const NONCE: [u8; 32] = [0x01; 32];
@@ -72,6 +73,8 @@ fn ed25519_round_trip() {
 
     let expected = advance_vector_digest(&ED25519, &NONCE, &pubkey, &pre, &post, None);
     assert_eq!(digest, expected, "returned digest is the next nonce");
+    verify_signature(&ED25519, &pubkey, &digest, signature_of(&advance))
+        .expect("the same signature verifies over the digest alone");
 }
 
 /// Negate `s` — the high-S malleated twin of a (k256-produced) low-S sig.
@@ -209,7 +212,7 @@ fn tampering_any_committed_byte_fails_verification() {
 /// `sdk/ts/test/verify.test.ts` pins the SAME constant — if either
 /// implementation drifts (hashing, sysvar serialization, flag promotion,
 /// index footer), its half of the pin breaks.
-const PINNED_DIGEST_HEX: &str = "60e745d8e318a4862ebdf99be084f1e0d07f3431c88887620d9b89fb0201cc0d";
+const PINNED_DIGEST_HEX: &str = "8060661aa87530fec5ba0ece740adf4b2d31ca4f5976e1f7e4134f27de699fe7";
 
 #[test]
 fn digest_matches_the_cross_language_pin() {
@@ -245,7 +248,7 @@ fn digest_matches_the_cross_language_pin() {
 /// `sdk/ts/test/verify.test.ts` pins the SAME constant — if either
 /// implementation drifts, its half of the pin breaks.
 const PINNED_REVOCATION_DIGEST_HEX: &str =
-    "be718a414d49cddd497fb38c1e4b5ba19cfb3c5062cf00136293915f1675dd54";
+    "1957b737e86507e781c3ae7808fe9d80ac5af1dea71cab740ecefdd42f149c2f";
 
 #[test]
 fn revocation_round_trip_and_cross_language_pin() {
@@ -269,4 +272,130 @@ fn revocation_round_trip_and_cross_language_pin() {
     assert_eq!(digest, revocation_digest(&ED25519, &NONCE, &pubkey));
     let hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
     assert_eq!(hex, PINNED_REVOCATION_DIGEST_HEX);
+}
+
+// ---------------------------------------------------------------------------
+// Digest-level checks, including Winternitz and XMSS
+// ---------------------------------------------------------------------------
+
+/// Fills with a fixed stream: these keys are for tests only.
+fn fill(
+    state: &mut u64,
+) -> impl FnMut(&mut [u8]) -> Result<(), solana_winternitz::SigningError> + '_ {
+    move |bytes| {
+        for byte in bytes {
+            *state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            *byte = (*state >> 56) as u8;
+        }
+        Ok(())
+    }
+}
+
+#[test]
+fn verify_signature_rejects_wrong_lengths() {
+    let digest = [0u8; 32];
+    assert_eq!(
+        verify_signature(&ED25519, &[0; 31], &digest, &[0; 64]),
+        Err(VerifyError::InvalidIdentity)
+    );
+    assert_eq!(
+        verify_signature(&ED25519, &[0; 32], &digest, &[0; 63]),
+        Err(VerifyError::MalformedSignature)
+    );
+}
+
+#[test]
+fn winternitz_digest_round_trip() {
+    let mut state = 1;
+    let key = hazmat::winternitz::SecretKey::generate(fill(&mut state)).unwrap();
+    let next = hazmat::winternitz::SecretKey::generate(fill(&mut state)).unwrap();
+    let identity = key.verifying_key().to_bytes();
+    let digest = [0xAB; 32];
+    let signature = key.sign_at(0, &digest, fill(&mut state)).unwrap();
+
+    verify_signature(&WINTERNITZ, &identity, &digest, signature.as_bytes())
+        .expect("digest round trip must verify");
+
+    let mut tampered = signature.to_bytes();
+    tampered[tampered.len() - 1] ^= 1;
+    assert_eq!(
+        verify_signature(&WINTERNITZ, &identity, &digest, &tampered),
+        Err(VerifyError::SignatureInvalid),
+    );
+    let mut other = identity;
+    other[0] ^= 1;
+    assert_eq!(
+        verify_signature(&WINTERNITZ, &other, &digest, signature.as_bytes()),
+        Err(VerifyError::SignatureInvalid),
+    );
+
+    // An advance covers the next key, so its digest is the rotating one.
+    let (pre, post) = fixed_ix_lists();
+    let next_key = next.verifying_key().to_bytes();
+    let advance_digest = rotating_advance_vector_digest(
+        &WINTERNITZ,
+        &NONCE,
+        &identity,
+        &next_key,
+        &pre,
+        &post,
+        None,
+    );
+    let advance_signature = key.sign_at(0, &advance_digest, fill(&mut state)).unwrap();
+    verify_signature(
+        &WINTERNITZ,
+        &identity,
+        &advance_digest,
+        advance_signature.as_bytes(),
+    )
+    .expect("advance digest round trip must verify");
+    assert_eq!(
+        verify_advance_signature(
+            &WINTERNITZ,
+            &identity,
+            &NONCE,
+            &pre,
+            &post,
+            None,
+            advance_signature.as_bytes(),
+        ),
+        Err(VerifyError::RotatingKey),
+    );
+}
+
+#[test]
+fn xmss_digest_round_trip_accepts_any_leaf() {
+    let mut state = 7;
+    let key = hazmat::xmss::SecretKey::generate(fill(&mut state)).unwrap();
+    let identity = key.verifying_key().to_bytes();
+    let digest = [0xCD; 32];
+    // Leaf 3 would be rejected on chain once `next_leaf` has moved past it.
+    // This check has no account state, so the leaf still verifies.
+    let signature = key.sign_at(3, &digest, fill(&mut state)).unwrap();
+    assert_eq!(signature.leaf(), 3);
+
+    verify_signature(&XMSS, &identity, &digest, signature.as_bytes())
+        .expect("a later leaf verifies without account state");
+
+    let mut tampered = signature.to_bytes();
+    tampered[4] ^= 1;
+    assert_eq!(
+        verify_signature(&XMSS, &identity, &digest, &tampered),
+        Err(VerifyError::SignatureInvalid),
+    );
+
+    // An XMSS advance may keep its key: the next key is the same one.
+    let (pre, post) = fixed_ix_lists();
+    let advance_digest =
+        rotating_advance_vector_digest(&XMSS, &NONCE, &identity, &identity, &pre, &post, None);
+    let advance_signature = key.sign_at(0, &advance_digest, fill(&mut state)).unwrap();
+    verify_signature(
+        &XMSS,
+        &identity,
+        &advance_digest,
+        advance_signature.as_bytes(),
+    )
+    .expect("advance digest round trip must verify");
 }

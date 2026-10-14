@@ -22,7 +22,7 @@ The fee payer or relayer is therefore not entrusted with authority over transact
 
 ## Multi-Scheme Support
 
-Vector is one program, `vectorcLBXJ2TuoKuUygkEi6FWqvBnbHDEDWoYamfjV`, serving every signing scheme. It lives in [`programs/vector`](programs/vector/): one file per instruction in [`src/instructions`](programs/vector/src/instructions/), and one file per scheme in [`src/schemes`](programs/vector/src/schemes/). A scheme is one `SigningScheme` impl: its scheme byte, what it stores as the signer's identity, the types of its key, signature and next key, and how it verifies. Every length is the size of one of those types. The instructions are the same for every scheme and reach a scheme only through the `Scheme` table built from that trait. Adding a scheme is a new file and one line in `schemes::scheme`.
+Vector is one program, `74mXFW7BSAAwc6zQC2uYKuDcWnz17HHXMWqLnEeg9BJv`, serving every signing scheme. It lives in [`programs/vector`](programs/vector/): one file per instruction in [`src/instructions`](programs/vector/src/instructions/), and one file per scheme in [`src/schemes`](programs/vector/src/schemes/). A scheme is one `SigningScheme` impl: its scheme byte, what it stores as the signer's identity, the types of its key, signature and next key, and how it verifies. Every length is the size of one of those types. The instructions are the same for every scheme and reach a scheme only through the `Scheme` table built from that trait. Adding a scheme is a new file and one line in `schemes::scheme`.
 
 | Scheme | Scheme byte | Identity | Signature | On-Chain Identity Storage | Pre-Sign Wrapper |
 |--------|------------|----------|-----------|---------------------------|------------------|
@@ -312,6 +312,7 @@ The `vector-core` crate provides off-chain helpers for constructing Vector trans
 - `sign_advance_instruction_secp256k1_eip191(signing_key, nonce, pre, post, fee_payer)` — sign with EIP-191 (envelope, 65-byte sig).
 - `sign_advance_instruction_secp256k1_ecdsa(signing_key, nonce, pre, post, fee_payer)` — sign with plain secp256k1 ECDSA (64-byte sig).
 - `verify_advance_signature(&scheme, identity, nonce, pre, post, fee_payer, signature)` — verify an advance signature fully offline with the program's own code, for every scheme but Winternitz and XMSS; returns the digest (= next nonce) on success. See [Offline verification](#offline-verification).
+- `verify_signature(&scheme, identity, &digest, signature)` — check a signature over a digest the caller already has, for every scheme, with the program's own code. Winternitz and XMSS take a `rotating_advance_vector_digest`; nothing records a spent key or an XMSS leaf.
 - `ed25519_pubkey` / `secp256k1_eip191_eth_address` / `secp256k1_compressed_pubkey` / `eth_address_from_pubkey` / `eip191_envelope_hash(digest)` — identity/envelope utilities.
 
 Falcon-512 and ML-DSA-44 signing are intentionally left to the caller (`solana-falcon512` and `solana-ml-dsa` are verify-only) — pair with an external signer such as `pqcrypto-falcon` or `fips204` (empty context) and feed the wire-format signature into `create_advance_instruction`.

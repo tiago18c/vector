@@ -57,7 +57,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "validator": "solana-test-validator --clone-feature-set --url mainnet-beta --bpf-program vectorcLBXJ2TuoKuUygkEi6FWqvBnbHDEDWoYamfjV ./target/deploy/vector.so --account SysvarRent111111111111111111111111111111111 ./fixtures/rent.json --mint EvFUfisEScFuZSqDXagC17m3bpP32B74dseMHtzQ5TNb --reset",
+    "validator": "solana-test-validator --clone-feature-set --url mainnet-beta --bpf-program 74mXFW7BSAAwc6zQC2uYKuDcWnz17HHXMWqLnEeg9BJv ./target/deploy/vector.so --account SysvarRent111111111111111111111111111111111 ./fixtures/rent.json --mint EvFUfisEScFuZSqDXagC17m3bpP32B74dseMHtzQ5TNb --reset",
     "test": "bun vitest run"
   },
   "dependencies": {
