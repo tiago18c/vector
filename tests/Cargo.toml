@@ -31,7 +31,7 @@ solana-system-interface = { version = "3.3", features = ["bincode"] }
 solana-transaction = { version = "4", features = ["serde", "verify"] }
 bincode = "1"
 k256 = { version = "0.13", features = ["ecdsa"] }
-ed25519-dalek = "=2.1.1"
+ed25519-dalek = "2.2"
 solana-falcon512 = { workspace = true }
 solana-ml-dsa = { workspace = true }
 fips204 = "0.4"
