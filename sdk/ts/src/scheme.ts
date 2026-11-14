@@ -17,7 +17,7 @@ export const CLOSE_DISCRIMINATOR = 4;
 export const INITIALIZE_NONCE_DISCRIMINATOR = 5;
 
 /** The Vector program: one program for every signing scheme. */
-export const PROGRAM_ID = new PublicKey("vectorcLBXJ2TuoKuUygkEi6FWqvBnbHDEDWoYamfjV");
+export const PROGRAM_ID = new PublicKey("74mXFW7BSAAwc6zQC2uYKuDcWnz17HHXMWqLnEeg9BJv");
 
 /**
  * The program's own errors, as `ProgramError::Custom(code)`; every other

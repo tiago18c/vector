@@ -27,7 +27,7 @@ fn initialize_checks_key_length_and_pda() {
     // Shared with sdk/ts/test/xmss.test.ts.
     assert_eq!(
         vector.to_string(),
-        "4kd7ArVtukusWaCpQgEZsqabWcnQbB4KjjwYnHVExk7c"
+        "FSq5rJupfYwaAbwgCmXYTj3NmLMkDWe8FSpn1SBQMgcW"
     );
     assert_eq!(bump, 255);
     let receiver = Address::new_from_array([9; 32]);
@@ -44,8 +44,8 @@ fn initialize_checks_key_length_and_pda() {
             None
         ),
         [
-            29, 105, 205, 166, 164, 7, 39, 200, 172, 179, 152, 231, 49, 141, 198, 123, 174, 2, 190,
-            22, 183, 150, 212, 200, 3, 26, 203, 187, 226, 46, 153, 168
+            31, 179, 181, 248, 57, 36, 101, 232, 6, 110, 102, 2, 178, 254, 174, 105, 180, 41, 164,
+            184, 226, 128, 5, 0, 15, 121, 126, 146, 129, 48, 224, 17
         ],
     );
     let accounts = [

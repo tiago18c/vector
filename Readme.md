@@ -28,7 +28,7 @@ A V1 transaction carries its limits in the message: compute units, loaded accoun
 
 ## Multi-Scheme Support
 
-Vector is one program, `vectorcLBXJ2TuoKuUygkEi6FWqvBnbHDEDWoYamfjV`, serving every signing scheme. It lives in [`programs/vector`](programs/vector/): one file per instruction in [`src/instructions`](programs/vector/src/instructions/), and one file per scheme in [`src/schemes`](programs/vector/src/schemes/). A scheme is one `SigningScheme` impl: its scheme byte, what it stores as the signer's identity, the types of its key, signature and next key, and how it verifies. Every length is the size of one of those types. The instructions are the same for every scheme and reach a scheme only through the `Scheme` table built from that trait. Adding a scheme is a new file and one line in `schemes::scheme`.
+Vector is one program, `74mXFW7BSAAwc6zQC2uYKuDcWnz17HHXMWqLnEeg9BJv`, serving every signing scheme. It lives in [`programs/vector`](programs/vector/): one file per instruction in [`src/instructions`](programs/vector/src/instructions/), and one file per scheme in [`src/schemes`](programs/vector/src/schemes/). A scheme is one `SigningScheme` impl: its scheme byte, what it stores as the signer's identity, the types of its key, signature and next key, and how it verifies. Every length is the size of one of those types. The instructions are the same for every scheme and reach a scheme only through the `Scheme` table built from that trait. Adding a scheme is a new file and one line in `schemes::scheme`.
 
 | Scheme | Scheme byte | Identity | Signature | On-Chain Identity Storage | Pre-Sign Wrapper |
 |--------|------------|----------|-----------|---------------------------|------------------|

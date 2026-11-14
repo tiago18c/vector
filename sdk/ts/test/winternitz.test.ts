@@ -18,7 +18,7 @@ test("Winternitz account and rotation digest match Rust", () => {
   const identity = publicKey;
   const receiver = new PublicKey(new Uint8Array(32).fill(9));
   const [pda, bump] = findVectorPda(WINTERNITZ, identity);
-  expect(pda.toString()).toBe("Er2fQZXAf3ZoVHiDQAgJGReN5qUz2oh6t8qfU3GGSb9Y");
+  expect(pda.toString()).toBe("TsFxombuVYmTHyEQt9CMss2ZzzoL9CdaB5T5xxchfSP");
   expect(bump).toBe(255);
   expect(vectorAccountLen(WINTERNITZ)).toBe(117);
 
@@ -52,6 +52,6 @@ test("Winternitz account and rotation digest match Rust", () => {
     WINTERNITZ, new Uint8Array(32).fill(255), identity, nextKey, [], [passthrough]
   );
   expect(Buffer.from(digest).toString("hex")).toBe(
-    "c9cbb58a103bb4ddd2626e8d942d1abc4b722413f6a9b47db8f562d33c7b5116"
+    "cfa2133f558144d9854de9993d5cf8b5b53431f562cf2b783cca0efd4dd4b334"
   );
 });
